@@ -13,16 +13,19 @@ DEFAULT_SOUNDS_SRC = "/home/emile/Musique/"
 DEFAULT_DELETABLE_STRING = "/storage/9016-4EF8/Sounds/"
 
 
+##
+## @brief      Colors inside the print() function
+##
 class Colors():
 	def __init__(self):
-		self.ENDC = '\033[0m'
-		self.OKGREEN = '\033[92m'
-		self.FAIL = '\033[91m'
-		self.OKBLUE = '\033[94m'
-		self.HEADER = '\033[95m'
-		self.WARNING = '\033[93m'
+		self.GREEN = '\033[92m'
+		self.BLUE = '\033[94m'
+		self.PINK = '\033[95m'
+		self.YELLOW = '\033[93m'
 		self.BOLD = '\033[1m'
 		self.UNDERLINE = '\033[4m'
+		self.FAIL = '\033[91m'
+		self.ENDC = '\033[0m' # Ends the colored string
 
 
 ##
@@ -157,7 +160,7 @@ class Extractor(Setup):
 	##
 	def copy_playlist(self, playlist):
 		playlist_basename = os.path.basename(playlist)
-		print(colors.HEADER + "Copying playlist : " + playlist_basename + colors.ENDC)
+		print(colors.PINK + "Copying playlist : " + playlist_basename + colors.ENDC)
 
 		# These 2 lists have the same length, so we can use files_names[i]
 		# when i parses files_in_playlist
@@ -172,7 +175,7 @@ class Extractor(Setup):
 		try:
 			os.mkdir(local_dst)
 		except NotImplementedError:
-			print(colors.WARNING + "The mkdir method wasn't implemented. No directory was created" + colors.ENDC)
+			print(colors.YELLOW + "The mkdir method wasn't implemented. No directory was created" + colors.ENDC)
 		except FileExistsError:
 			pass
 
@@ -192,9 +195,9 @@ class Extractor(Setup):
 			finally:
 				file_count += 1
 
-			print(colors.OKGREEN + "File number " + str(file_count) + " successfully copied : " + str(current_file).strip(".mp3") + colors.ENDC)
+			print(colors.GREEN + "File number " + str(file_count) + " successfully copied : " + str(current_file).strip(".mp3") + colors.ENDC)
 			copied_files += 1
-		print(colors.WARNING + "This program successfully copied " + str(copied_files) + " files out of " + str(file_count) + colors.ENDC)
+		print(colors.YELLOW + "This program successfully copied " + str(copied_files) + " files out of " + str(file_count) + colors.ENDC)
 
 
 
