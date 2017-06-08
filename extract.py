@@ -4,7 +4,7 @@
 import sys # Useful everywhere
 import os.path # Manage file's paths
 from os import mkdir # Create directories
-from shutil import copy2 # Copy files
+from shutil import copy2 as copy_file
 
 
 DEFAULT_PLAYLIST_SRC = "/home/emile/Documents/Programmation/C/playlist_extract/playlist"
@@ -173,7 +173,7 @@ class Extractor(Setup):
 		local_dst = self.sounds_dst + playlist_basename
 
 		try:
-			os.mkdir(local_dst)
+			mkdir(local_dst)
 		except NotImplementedError:
 			print(colors.YELLOW + "The mkdir method wasn't implemented. No directory was created" + colors.ENDC)
 		except FileExistsError:
@@ -184,11 +184,11 @@ class Extractor(Setup):
 			try:
 				if not os.path.exists(i):
 					raise FileNotFoundError
-				shutil.copy2(i, local_dst + "/" + current_file)
+				copy_file(i, local_dst + "/" + current_file)
 			except FileNotFoundError:
 				try:
 					# Tries again with no "/" added
-					shutil.copy2(i, local_dst + current_file)
+					copy_file(i, local_dst + current_file)
 				except FileNotFoundError:
 					print(colors.FAIL + "FILE NOT FOUND: " + current_file.strip(".mp3") + colors.ENDC)
 					continue
