@@ -1,20 +1,22 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import tkinter
+import tkinter as tk
 
-fenetre = tkinter.Tk()
+class Application():
+	def __init__(self):
+		self.__main_window = tk.Tk()
 
-label = tkinter.Label(fenetre, text="Salut")
-label.pack()
+	@property
+	def main_window(self):
+		return self.__main_window
 
-bouton = tkinter.Button(fenetre, text="Fermer", command=fenetre.quit)
-bouton.pack()
 
-value = tkinter.StringVar()
-value.set("Default")
-s = ""
-entree = tkinter.Entry(fenetre, textvariable=s, width=30)
-entree.pack()
+if __name__ == '__main__':
+	main_window = tk.Tk()
 
-fenetre.mainloop()
+	playlist_list = tk.Listbox(main_window)
+	playlist_list.insert(1, "Un truc calme")
+	playlist_list.pack()
+
+	main_window.mainloop()

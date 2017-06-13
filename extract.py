@@ -61,7 +61,7 @@ class Setup():
 class Extractor(Setup):
 	def __init__(self, playlist_src = DEFAULT_PLAYLIST_SRC, sounds_src = DEFAULT_SOUNDS_SRC, sounds_dst = DEFAULT_SOUNDS_DST, deletable_string = DEFAULT_DELETABLE_STRING):
 		super().__init__(playlist_src, sounds_src, sounds_dst, deletable_string)
-		# Permet la concaténation du chemin du fichier avec son nom
+		# Allows the concatenation of the file's path with its name
 		self.__playlist_list = [self.playlist_src + "/" + p for p in os.listdir(self.playlist_src)]
 
 	@property
@@ -175,7 +175,7 @@ class Extractor(Setup):
 		try:
 			mkdir(local_dst)
 		except NotImplementedError:
-			print(colors.YELLOW + "The mkdir method wasn't implemented. No directory was created" + colors.ENDC)
+			print(colors.YELLOW + "The mkdir method is not implemented by the kernel. No directory was created" + colors.ENDC)
 		except FileExistsError:
 			pass
 
