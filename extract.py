@@ -41,23 +41,17 @@ class Colors(object):
 class Setup(object):
 	def __init__(self, playlist_src, sounds_src, sounds_dst, deletable_string):
 		self.__playlist_src = playlist_src
-		self.__sounds_src = sounds_src
-		self.__sounds_dst = sounds_dst
-		self.__deletable_string = deletable_string
+		self.sounds_src = sounds_src
+		self.sounds_dst = sounds_dst
+		self.deletable_string = deletable_string
 
 	@property
 	def playlist_src(self):
 		return self.__playlist_src
-	@property
-	def sounds_src(self):
-		return self.__sounds_src
-	@property
-	def sounds_dst(self):
-		return self.__sounds_dst
-	@property
-	def deletable_string(self):
-		return self.__deletable_string
 
+	@playlist_src.setter
+	def playlist_src(self, new_src):
+		self.__playlist_src = new_src
 
 ##
 ## @brief      Contains the list of the files contained in the playlsit folder
@@ -69,16 +63,18 @@ class Extractor(Setup):
 		super().__init__(playlist_src, sounds_src, sounds_dst, deletable_string)
 		self.__playlist_list = os.listdir(self.playlist_src)
 		# Allows the concatenation of the playlist's location with its name
-		self.__playlist_list_with_path = [self.playlist_src + "/" + p for p in self.playlist_list]
+		self.playlist_list_with_path = [self.playlist_src + "/" + p for p in self.playlist_list]
 		self.colors = Colors()
 
 	@property
 	def playlist_list(self):
 		return self.__playlist_list
 
-	@property
-	def playlist_list_with_path(self):
-		return self.__playlist_list_with_path
+	@playlist_list.setter
+	def playlist_list(self, directory):
+		self.playlist_src = directory
+		self.__playlist_list = os.listdir(directory)
+
 
 
 	##
