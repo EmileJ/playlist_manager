@@ -7,16 +7,21 @@ from os import mkdir # Create directories
 from shutil import copy2 as copy_file
 
 
-DEFAULT_PLAYLIST_SRC = "/home/emile/Documents/Programmation/C/playlist_extract/playlist"
-DEFAULT_SOUNDS_DST = "/home/emile/Documents/Programmation/C/playlist_extract/sounds/"
-DEFAULT_SOUNDS_SRC = "/home/emile/Musique/"
-DEFAULT_DELETABLE_STRING = "/storage/9016-4EF8/Sounds/"
+##
+## @brief      Default settings for playlist (will be removed later)
+##
+class DefaultSettings(object):
+	def __init__(self):
+		self.DEFAULT_PLAYLIST_SRC = "/home/emile/Documents/programmation/python/playlist_manager/playlist"
+		self.DEFAULT_SOUNDS_DST = "/home/emile/Documents/programmation/python/playlist_manager/sounds"
+		self.DEFAULT_SOUNDS_SRC = "/home/emile/Musique/"
+		self.DEFAULT_DELETABLE_STRING = "/storage/9016-4EF8/Sounds/"
 
 
 ##
 ## @brief      Colors inside the print() function
 ##
-class Colors():
+class Colors(object):
 	def __init__(self):
 		self.GREEN = '\033[92m'
 		self.BLUE = '\033[94m'
@@ -33,8 +38,8 @@ class Colors():
 ##             where are the source of his sounds, where does he want to copy
 ##             his sounds to
 ##
-class Setup():
-	def __init__(self, playlist_src = DEFAULT_PLAYLIST_SRC, sounds_src = DEFAULT_SOUNDS_SRC, sounds_dst = DEFAULT_SOUNDS_DST, deletable_string = DEFAULT_DELETABLE_STRING):
+class Setup(object):
+	def __init__(self, playlist_src, sounds_src, sounds_dst, deletable_string):
 		self.__playlist_src = playlist_src
 		self.__sounds_src = sounds_src
 		self.__sounds_dst = sounds_dst
@@ -59,14 +64,21 @@ class Setup():
 ##             and in the sounds folder
 ##
 class Extractor(Setup):
-	def __init__(self, playlist_src = DEFAULT_PLAYLIST_SRC, sounds_src = DEFAULT_SOUNDS_SRC, sounds_dst = DEFAULT_SOUNDS_DST, deletable_string = DEFAULT_DELETABLE_STRING):
+	default_setting = DefaultSettings()
+	def __init__(self, playlist_src = default_setting.DEFAULT_PLAYLIST_SRC, sounds_src = default_setting.DEFAULT_SOUNDS_SRC, sounds_dst = default_setting.DEFAULT_SOUNDS_DST, deletable_string = default_setting.DEFAULT_DELETABLE_STRING):
 		super().__init__(playlist_src, sounds_src, sounds_dst, deletable_string)
-		# Allows the concatenation of the file's path with its name
-		self.__playlist_list = [self.playlist_src + "/" + p for p in os.listdir(self.playlist_src)]
+		self.__playlist_list = os.listdir(self.playlist_src)
+		# Allows the concatenation of the playlist's location with its name
+		self.__playlist_list_with_path = [self.playlist_src + "/" + p for p in self.playlist_list]
+		self.colors = Colors()
 
 	@property
 	def playlist_list(self):
 		return self.__playlist_list
+
+	@property
+	def playlist_list_with_path(self):
+		return self.__playlist_list_with_path
 
 
 	##
@@ -160,22 +172,22 @@ class Extractor(Setup):
 	##
 	def copy_playlist(self, playlist):
 		playlist_basename = os.path.basename(playlist)
-		print(colors.PINK + "Copying playlist : " + playlist_basename + colors.ENDC)
+		print(self.colors.PINK + "Copying playlist : " + playlist_basename + self.colors.ENDC)
 
 		# These 2 lists have the same length, so we can use files_names[i]
 		# when i parses files_in_playlist
 		files_names = self.__clean_list(playlist) # Name of the files, solely
-		files_in_playlist = self.__put_correct_path_(files_names) # Names of the path concatenated with names of the files
+		files_in_playlist = self.__put_correct_path_(files_names) # Name of the source folder's path concatenated with files names
 
 		file_count = 0
 		copied_files = 0
 
-		local_dst = self.sounds_dst + playlist_basename
+		local_dst = self.sounds_dst + "/" + playlist_basename
 
 		try:
 			mkdir(local_dst)
 		except NotImplementedError:
-			print(colors.YELLOW + "The mkdir method is not implemented by the kernel. No directory was created" + colors.ENDC)
+			print(self.colors.YELLOW + "The mkdir method is not implemented by the kernel. No directory was created" + self.colors.ENDC)
 		except FileExistsError:
 			pass
 
@@ -190,14 +202,14 @@ class Extractor(Setup):
 					# Tries again with no "/" added
 					copy_file(i, local_dst + current_file)
 				except FileNotFoundError:
-					print(colors.FAIL + "FILE NOT FOUND: " + current_file.strip(".mp3") + colors.ENDC)
+					print(self.colors.FAIL + "FILE NOT FOUND: " + current_file.strip(".mp3") + self.colors.ENDC)
 					continue
 			finally:
 				file_count += 1
 
-			print(colors.GREEN + "File number " + str(file_count) + " successfully copied : " + str(current_file).strip(".mp3") + colors.ENDC)
+			print(self.colors.GREEN + "File number " + str(file_count) + " successfully copied : " + str(current_file).strip(".mp3") + self.colors.ENDC)
 			copied_files += 1
-		print(colors.YELLOW + "This program successfully copied " + str(copied_files) + " files out of " + str(file_count) + colors.ENDC)
+		print(self.colors.YELLOW + "This program successfully copied " + str(copied_files) + " files out of " + str(file_count) + self.colors.ENDC)
 
 
 
@@ -205,5 +217,5 @@ class Extractor(Setup):
 if __name__ == '__main__':
 	user = Extractor()
 	colors = Colors()
-	for l in user.playlist_list:
+	for l in user.playlist_list_with_path:
 		user.copy_playlist(l)
