@@ -1,2 +1,5 @@
 EXTRACT:
   ☐ Remove the default playlist settings
+
+GRAPHICAL:
+  ☐ Split graphical into classes: each class corresponds to a different window (needed to update buttons). Or don't. Just block some buttons and active some other

@@ -85,7 +85,7 @@ class Extractor(Setup):
 	##
 	## @return     The list matching the playlist
 	##
-	def get_files_in_playlist(self, playlist):
+	def getFilesInPlaylist(self, playlist):
 		l = []
 		if not playlist.endswith(".txt"):
 			raise TypeError("The playlist is not ending with \".txt\"")
@@ -105,7 +105,7 @@ class Extractor(Setup):
 	##
 	## @return     The cleaned name
 	##
-	def __clean_name(self, name):
+	def __cleanName(self, name):
 		return name.replace(self.deletable_string, "").strip('\n')
 
 
@@ -116,10 +116,10 @@ class Extractor(Setup):
 	##
 	## @return     A list of cleaned strings
 	##
-	def __clean_list(self, playlist):
+	def __cleanList(self, playlist):
 		cleaned_list = []
-		for i in self.get_files_in_playlist(playlist):
-			cleaned_list = cleaned_list + [self.__clean_name(i)]
+		for i in self.getFilesInPlaylist(playlist):
+			cleaned_list = cleaned_list + [self.__cleanName(i)]
 		return cleaned_list
 
 
@@ -131,7 +131,7 @@ class Extractor(Setup):
 	##
 	## @return     A string corresponding to the concatenation
 	##
-	def __put_correct_path_with_file(self, file_name):
+	def __putCorrectPathWithFile(self, file_name):
 		return self.sounds_src + file_name
 
 
@@ -146,7 +146,7 @@ class Extractor(Setup):
 	def __put_correct_path_(self, files_in_playlist):
 		l = []
 		for i in files_in_playlist:
-			l = l + [self.__put_correct_path_with_file(i)]
+			l = l + [self.__putCorrectPathWithFile(i)]
 		return l
 
 
@@ -155,8 +155,8 @@ class Extractor(Setup):
 	##
 	## @param      playlist  The playlist
 	##
-	def print_playlist(self, playlist):
-		for i in self.__clean_list(playlist):
+	def printPlaylist(self, playlist):
+		for i in self.__cleanList(playlist):
 			print(i)
 
 
@@ -166,13 +166,13 @@ class Extractor(Setup):
 	##
 	## @param      playlist  The playlist to copy
 	##
-	def copy_playlist(self, playlist):
+	def copyPlaylist(self, playlist):
 		playlist_basename = os.path.basename(playlist)
 		print(self.colors.PINK + "Copying playlist : " + playlist_basename + self.colors.ENDC)
 
 		# These 2 lists have the same length, so we can use files_names[i]
 		# when i parses files_in_playlist
-		files_names = self.__clean_list(playlist) # Name of the files, solely
+		files_names = self.__cleanList(playlist) # Name of the files, solely
 		files_in_playlist = self.__put_correct_path_(files_names) # Name of the source folder's path concatenated with files names
 
 		file_count = 0
@@ -214,4 +214,4 @@ if __name__ == '__main__':
 	user = Extractor()
 	colors = Colors()
 	for l in user.playlist_list_with_path:
-		user.copy_playlist(l)
+		user.copyPlaylist(l)
