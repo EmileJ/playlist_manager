@@ -77,15 +77,17 @@ class Extractor(Setup):
 
 
 
-	##
-	## @brief      Gets the files contained in a playlist and puts it into a
-	##             python list
-	##
-	## @param      playlist  The playlist
-	##
-	## @return     The list matching the playlist
-	##
 	def getFilesInPlaylist(self, playlist):
+		"""Gets the path to the files contained in a playlist and puts it into a
+		python list
+
+		Args:
+		    playlist (str): The full path to the playlist
+
+		Returns:
+		    list: A list of strings corresponding to the full path of the files in the playlist
+		"""
+
 		l = []
 		if not playlist.endswith(".txt"):
 			raise TypeError("The playlist is not ending with \".txt\"")
@@ -97,83 +99,67 @@ class Extractor(Setup):
 		return l
 
 
-	##
-	## @brief      Removes the local, unwanted file's path written in the
-	##             playlist. Sanitzes the string too.
-	##
-	## @param      name  The name of the file to clean
-	##
-	## @return     The cleaned name
-	##
-	def __cleanName(self, name):
-		return name.replace(self.deletable_string, "").strip('\n')
-
-
-	##
-	## @brief      Cleans a list of strings as specified upper
-	##
-	## @param      playlist  The playlist to clean
-	##
-	## @return     A list of cleaned strings
-	##
 	def __cleanList(self, playlist):
+		"""Cleans a list of strings using this method:
+		Removes the local, unwanted file's path written in the
+		playlist. Sanitzes the string too (deletes \n).
+
+		Args:
+		    playlist (TYPE): The full path to the playlist
+
+		Returns:
+		   list: A list of the cleaned strings contained in the playlist
+		"""
+
 		cleaned_list = []
 		for i in self.getFilesInPlaylist(playlist):
-			cleaned_list = cleaned_list + [self.__cleanName(i)]
+			cleaned_list = cleaned_list + [i.replace(self.deletable_string, "").strip('\n')]
 		return cleaned_list
 
 
-	##
-	## @brief      Concatenates the sounds source folder's name with the file's
-	##             name
-	##
-	## @param      file_name  The file's name
-	##
-	## @return     A string corresponding to the concatenation
-	##
-	def __putCorrectPathWithFile(self, file_name):
-		return self.sounds_src + file_name
 
+	def __putSourcePathWithList(self, files_in_playlist):
+		"""Concatenates the sounds source folder's name with all the
+		file's names
 
-	##
-	## @brief      Concatenates the sounds source folder's name with all the
-	##             file's names
-	##
-	## @param      files_in_playlist  The files in playlist
-	##
-	## @return     A list of string corresponding to all the concatenations
-	##
-	def __put_correct_path_(self, files_in_playlist):
+		Args:
+		    files_in_playlist (list): A list of strings corresponding to the file's names
+
+		Returns:
+		    list: A list of string corresponding to all the concatenations of the source path and the file's names
+		"""
+
 		l = []
 		for i in files_in_playlist:
-			l = l + [self.__putCorrectPathWithFile(i)]
+			l = l + [self.sounds_src + file_name]
 		return l
 
 
-	##
-	## @brief      Prints the files contained in a playlist
-	##
-	## @param      playlist  The playlist
-	##
 	def printPlaylist(self, playlist):
+		"""Prints the files contained in a playlist
+
+		Args:
+		    playlist (str): The full path to the playlist to copy
+		"""
 		for i in self.__cleanList(playlist):
 			print(i)
 
 
-	##
-	## @brief      Copy the playlist to the folder specified in the class's
-	##             private arguments
-	##
-	## @param      playlist  The playlist to copy
-	##
 	def copyPlaylist(self, playlist):
+		"""Copy the playlist to the folder specified in the class's
+		private arguments
+
+		Args:
+		    playlist (str): The full path to the playlist to copy
+		"""
+
 		playlist_basename = os.path.basename(playlist)
 		print(self.colors.PINK + "Copying playlist : " + playlist_basename + self.colors.ENDC)
 
 		# These 2 lists have the same length, so we can use files_names[i]
 		# when i parses files_in_playlist
 		files_names = self.__cleanList(playlist) # Name of the files, solely
-		files_in_playlist = self.__put_correct_path_(files_names) # Name of the source folder's path concatenated with files names
+		files_in_playlist = self.__putSourcePathWithList(files_names) # Name of the source folder's path concatenated with files names
 
 		file_count = 0
 		copied_files = 0
