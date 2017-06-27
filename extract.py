@@ -6,7 +6,9 @@ import os.path # Manage file's paths
 import queue # Used for threading
 from os import mkdir # Create directories
 from shutil import copy2 as copy_file
-from enum import Enum
+from enum import Enum # Allow enumerations
+
+from error import *
 
 
 # List of the available audio file extensions.
@@ -46,7 +48,6 @@ Colors = {
 	'FAIL' : '\033[91m',
 	'ENDC' : '\033[0m' # Ends the colored string
 }
-
 
 
 ##
@@ -109,12 +110,15 @@ class Extractor(Setup):
 		    playlist (str): The full path to the playlist
 
 		Returns:
-		    list: A list of strings corresponding to the full path of the files in the playlist
+		    list: A list of strings corresponding to the full path of the files in the playlist. Empty list if the playlist argument is not valid
 		"""
 
 		l = []
+		if playlist == "":
+			raise FileError("ERROR: The playlist is not selected")
+			return []
 		if not playlist.endswith(".txt"):
-			raise TypeError("The playlist is not ending with \".txt\"")
+			raise FileError("ERROR: The playlist is not ending with \".txt\"")
 			return []
 		f = open(playlist, "r")
 		for line in f:
@@ -138,7 +142,7 @@ class Extractor(Setup):
 
 		cleaned_list = []
 		for i in list_to_be_cleaned:
-			cleaned_file = i.replace(self.deletable_string, "").strip('\n')
+			cleaned_file = os.path.basename(i.strip('\n'))
 			if delete_extension:
 				for i in BAD_EXTENSIONS:
 					cleaned_file = cleaned_file.strip(i)
@@ -155,8 +159,12 @@ class Extractor(Setup):
 		    files_in_playlist (list): A list of strings corresponding to the file's names
 
 		Returns:
-		    list: A list of string corresponding to all the concatenations of the source path and the file's names
+		    list: A list of string corresponding to all the concatenations of the source path and the file's names. Empty list if error.
 		"""
+
+		if self.sounds_src == "":
+			raise FolderError("ERROR: No source for sounds was defined")
+			return []
 
 		l = []
 		for i in files_in_playlist:
@@ -183,19 +191,22 @@ class Extractor(Setup):
 		    playlist (str): The full path to the playlist to copy
 
 		Returns:
-			NoneType: Res None if an error is encountered
+			NoneType: Returns None if an error is encountered
 		"""
 
+		if self.sounds_dst == "":
+			raise FolderError("ERROR: No destination folder was defined")
+			return None
+
+		try:
+			files_list = self.getFilesInPlaylist(playlist)
+		except:
+			raise # Re-raises the last raise again, so the error handler can catch the exception
+			return None
 
 		playlist_basename = os.path.basename(playlist)
 		print(Colors['PINK'] + "Copying playlist : " + playlist_basename + Colors['ENDC'])
 
-		#
-		try:
-			files_list = self.getFilesInPlaylist(playlist)
-		except:
-			raise
-			return None
 		files_names = self.cleanList(files_list) # Name of the files, solely
 		files_in_playlist = self.__putSourcePathWithList(files_names) # Name of the source folder's path concatenated with files names
 
@@ -208,6 +219,7 @@ class Extractor(Setup):
 			mkdir(local_dst)
 		except NotImplementedError:
 			print(Colors['YELLOW'] + "The mkdir method is not implemented by the kernel. No directory was created" + Colors['ENDC'])
+			local_dst = "." # Resets the destination of the copy to the current folder
 		except FileExistsError:
 			pass
 

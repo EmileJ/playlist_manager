@@ -9,6 +9,7 @@ import tkinter.messagebox
 from enum import Enum
 
 from extract import *
+from error import *
 
 # Padding with window's borders applied on every TK widget
 DEFAULT_PADDING = 10
@@ -115,7 +116,7 @@ class Graphical(object):
 		self.buttons = {
 			'playlist' : tk.Button(self.main_window, text = "PLAYLIST", command = lambda : self.askForFile(Folder.PLAYLIST_FOLDER, file_name = "your playlist folder")),
 			'sounds_source' : tk.Button(self.main_window, text = "SOURCE" , command = lambda : self.askForFile(Folder.SOUNDS_SRC, file_name = "your sounds folder")),
-			'extract' : tk.Button(self.main_window, text = "EXTRACT", command = lambda : self.errorHandlerMessageBox(lambda : tryToCopyPlaylist(self.playlist_chosen_by_user)))
+			'extract' : tk.Button(self.main_window, text = "EXTRACT", command = lambda : self.errorHandlerMessageBox(lambda : self.user.copyPlaylist(self.playlist_chosen_by_user)))
 		}
 		# Place the buttons
 		self.buttons['playlist'].grid(column = 0, row = 1, padx = DEFAULT_PADDING, sticky = tk.W)
@@ -159,8 +160,17 @@ class Graphical(object):
 		"""
 		try:
 			f()
-		except:
-			tk.messagebox.showerror("ERROR", "An error was encoutered")
+
+		# Manages critical errors
+		except FileError as e:
+			tk.messagebox.showerror("ERROR: File not found", e)
+		except FolderError as e:
+			tk.messagebox.showerror("ERROR: Folder not found", e)
+
+		# Manages warnings
+		except NotImplementedError as e:
+			tk.messagebox.showwarning("WARNING: No directory created", e)
+
 
 
 
