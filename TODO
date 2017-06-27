@@ -4,3 +4,4 @@ EXTRACT:
 
 GRAPHICAL:
  ☐ Manage raised errors in the errorHandler function. Maybe a new param called "type" could be added to this one, desribing the type of error window to be opened (error, warning, ...)
+ ☐ Better printing of the playlists when rapidly switching between them: store playlists in a list that doesn't change
