@@ -60,17 +60,17 @@ class Graphical(object):
 		# When the program inits, the user is on the main window
 		self.state = self.available_widows.MAIN
 
-		self.__last_file_chosen_by_user = ""
+		self.__playlist_chosen_by_user = ""
 
 
 	@property
-	def last_file_chosen_by_user(self):
-		return self.__last_file_chosen_by_user
+	def playlist_chosen_by_user(self):
+		return self.__playlist_chosen_by_user
 
-	@last_file_chosen_by_user.setter
-	def last_file_chosen_by_user(self, new_file):
+	@playlist_chosen_by_user.setter
+	def playlist_chosen_by_user(self, new_file):
 		if new_file != "":
-			self.__last_file_chosen_by_user = new_file
+			self.__playlist_chosen_by_user = new_file
 
 
 
@@ -89,12 +89,20 @@ class Graphical(object):
 
 		self.main_window.rowconfigure(0, weight = 1)
 		self.main_window.rowconfigure(1, weight = 1)
-		self.main_window.rowconfigure(2, weight = 3)
+		self.main_window.rowconfigure(2, weight = 1)
+		self.main_window.rowconfigure(3, weight = 1)
+		self.main_window.rowconfigure(4, weight = 1)
+		self.main_window.rowconfigure(5, weight = 1)
+		self.main_window.rowconfigure(6, weight = 10)
 
 
-		self.main_window.columnconfigure(0, weight = 2)
-		self.main_window.columnconfigure(1, weight = 1)
-		self.main_window.columnconfigure(2, weight = 2)
+
+		self.main_window.columnconfigure(0, weight = 1)
+		self.main_window.columnconfigure(1, weight = 2)
+		self.main_window.columnconfigure(2, weight = 1)
+		self.main_window.columnconfigure(3, weight = 3)
+		self.main_window.columnconfigure(4, weight = 2)
+		self.main_window.columnconfigure(5, weight = 3)
 
 		self.main_window.grid_propagate(0)
 
@@ -105,11 +113,20 @@ class Graphical(object):
 
 		self.buttons = {
 			'playlist' : tk.Button(self.main_window, text = "PLAYLIST", command = lambda : self.askForFile(Folder.PLAYLIST_FOLDER, file_name = "your playlist folder")),
-			'sounds_source' : tk.Button(self.main_window, text = "SOURCE" , command = lambda : self.askForFile(Folder.SOUNDS_SRC, file_name = "your sounds folder"))
+			'sounds_source' : tk.Button(self.main_window, text = "SOURCE" , command = lambda : self.askForFile(Folder.SOUNDS_SRC, file_name = "your sounds folder")),
+			'extract' : tk.Button(self.main_window, text = "EXTRACT", command = lambda : self.user.copyPlaylist(self.playlist_chosen_by_user))
 		}
 		# Place the buttons
-		self.buttons['playlist'].grid(column = 0, row = 0, padx = DEFAULT_PADDING, sticky = tk.W)
-		self.buttons['sounds_source'].grid(column = 0, row = 1, padx = DEFAULT_PADDING, sticky = tk.W+tk.N)
+		self.buttons['playlist'].grid(column = 0, row = 1, padx = DEFAULT_PADDING, sticky = tk.W)
+		self.buttons['sounds_source'].grid(column = 0, row = 3, padx = DEFAULT_PADDING, sticky = tk.W)
+		self.buttons['extract'].grid(column = 3, row = 5, pady = DEFAULT_PADDING, sticky = tk.N)
+
+		self.labels = {
+			'playlist' : tk.Label(self.main_window, background = '#fff', relief = tk.SUNKEN),
+			'sounds_source' : tk.Label(self.main_window, background = '#fff', relief = tk.SUNKEN)
+		}
+		self.labels['playlist'].grid(column = 1, row = 1, columnspan = 3, padx = DEFAULT_PADDING, sticky = tk.W+tk.E)
+		self.labels['sounds_source'].grid(column = 1, row = 3, columnspan = 3, padx = DEFAULT_PADDING, sticky = tk.W+tk.E)
 
 
 		self.listboxs = {
@@ -118,8 +135,8 @@ class Graphical(object):
 		}
 
 		# Place the listboxs
-		self.listboxs['playlists'].grid(column = 0, row = 2, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING, sticky = tk.W+tk.N+tk.S+tk.E)
-		self.listboxs['sounds'].grid(column = 2, row = 2, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING, sticky = tk.W+tk.N+tk.S+tk.E)
+		self.listboxs['playlists'].grid(column = 0, columnspan = 3, row = 5, rowspan = 2, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING, sticky = tk.W+tk.N+tk.S+tk.E)
+		self.listboxs['sounds'].grid(column = 4, columnspan = 2, row = 5, rowspan = 2, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING, sticky = tk.W+tk.N+tk.S+tk.E)
 
 	def updateListbox(self, l, lb):
 		"""Resets and adds items contaned in a list to a TK listbox
@@ -134,9 +151,21 @@ class Graphical(object):
 			lb.insert(tk.END, l[i])
 
 	def __getAndUpdateListbox(self, event):
+		"""Updates the sounds listbox when the user clicks on a playlist
+
+		Args:
+		    event (tkinter.Event): The event passed by tkinter. Not used in this function
+		"""
+
+		# Gets the full path of the playlist's location
 		playlist_full_path = self.user.playlist_src + "/" + self.listboxs['playlists'].get(tk.ACTIVE)
+		self.playlist_chosen_by_user = playlist_full_path
+		# Lists all the files contained in the playlist
 		sounds_in_playlist = self.user.getFilesInPlaylist(playlist_full_path)
+		# Cleans the playlist with all the unwanted strings
 		sounds_in_playlist = self.user.cleanList(sounds_in_playlist, delete_extension = True)
+		sounds_in_playlist.sort()
+		# Finally, updates the listbox
 		if sounds_in_playlist != []:
 			self.updateListbox(sounds_in_playlist, self.listboxs['sounds'])
 
@@ -163,12 +192,14 @@ class Graphical(object):
 		if required_folder == Folder.PLAYLIST_FOLDER:
 			self.user.playlist_list = user_folder # Updates the users info
 			self.updateListbox(self.user.playlist_list, self.listboxs['playlists']) # Updates the playlists listbox
+			self.labels['playlist'].configure(text = user_folder)
 
-			# When the user clicks on a playlist in the listbox, updates self.last_file_chosen_by_user
+			# When the user clicks on a playlist in the listbox, updates self.playlist_chosen_by_user
 			self.listboxs['playlists'].bind('<<ListboxSelect>>', self.__getAndUpdateListbox)
 
 		elif required_folder == Folder.SOUNDS_SRC:
 			self.user.sounds_src = user_folder
+			self.labels['sounds_source'].configure(text = user_folder)
 
 		elif required_folder == Folder.SOUNDS_DST:
 			self.user.sounds_dst = user_folder

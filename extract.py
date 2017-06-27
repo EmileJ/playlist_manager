@@ -8,6 +8,11 @@ from os import mkdir # Create directories
 from shutil import copy2 as copy_file
 from enum import Enum
 
+
+# List of the available audio file extensions.
+BAD_EXTENSIONS = [".mp3", ".wav", ".ogg", ".wma"]
+
+
 ##
 ## @brief      Default settings for playlist (will be removed later)
 ##
@@ -131,13 +136,11 @@ class Extractor(Setup):
 		   list: A list of the cleaned strings contained in the playlist
 		"""
 
-		bad_extensions = [".mp3", ".wav", ".ogg", ".wma"]
-
 		cleaned_list = []
 		for i in list_to_be_cleaned:
 			cleaned_file = i.replace(self.deletable_string, "").strip('\n')
 			if delete_extension:
-				for i in bad_extensions:
+				for i in BAD_EXTENSIONS:
 					cleaned_file = cleaned_file.strip(i)
 			cleaned_list = cleaned_list + [cleaned_file]
 		return cleaned_list
