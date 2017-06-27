@@ -115,7 +115,7 @@ class Extractor(Setup):
 		l = []
 		if not playlist.endswith(".txt"):
 			raise TypeError("The playlist is not ending with \".txt\"")
-			sys.exit(1)
+			return []
 		f = open(playlist, "r")
 		for line in f:
 			l = l + [line.strip('\n')]
@@ -181,15 +181,21 @@ class Extractor(Setup):
 
 		Args:
 		    playlist (str): The full path to the playlist to copy
+
+		Returns:
+			NoneType: Res None if an error is encountered
 		"""
 
 
 		playlist_basename = os.path.basename(playlist)
 		print(Colors['PINK'] + "Copying playlist : " + playlist_basename + Colors['ENDC'])
 
-		# These 2 lists have the same length, so we can use files_names[i]
-		# when i parses files_in_playlist
-		files_list = self.getFilesInPlaylist(playlist)
+		#
+		try:
+			files_list = self.getFilesInPlaylist(playlist)
+		except:
+			raise
+			return None
 		files_names = self.cleanList(files_list) # Name of the files, solely
 		files_in_playlist = self.__putSourcePathWithList(files_names) # Name of the source folder's path concatenated with files names
 
