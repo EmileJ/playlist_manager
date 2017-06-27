@@ -2,7 +2,7 @@
 An easy tool to manage his playlists, including extracting files from a playlist to a folder.
 
 ## Installation
-Just launch `extract.py` to extract files from your playlist
+Execute `./playlist_manager.py` to launch the software.
 (At that time, it's not working. I will make it work when I'll have time to work on it.)
 
 ## License
