@@ -1,12 +1,30 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import threading
+import queue
 import tkinter as tk
 import tkinter.filedialog
+from enum import Enum
+
 from extract import *
 
 # Padding with window's borders applied on every TK widget
 DEFAULT_PADDING = 10
+
+
+class Folder(Enum):
+	"""Describes the limited kind of folders this program has to manage.
+
+	Attributes:
+	    PLAYLIST_FOLDER (int): The folder where the user's playlists are stored
+	    SOUNDS_DST (int): The destination of the sounds
+	    SOUNDS_SRC (int): The source of the sounds
+	"""
+	PLAYLIST_FOLDER = 0
+	SOUNDS_SRC = 1
+	SOUNDS_DST = 2
+
 
 
 class AvailableWindows():
@@ -25,7 +43,14 @@ class Graphical(object):
 		self.root.rowconfigure(0, weight = 1)
 		self.root.columnconfigure(0, weight = 1)
 
-		self.__initMainWindow(self.root.winfo_screenwidth(), self.root.winfo_screenheight())
+		screen_width = self.root.winfo_screenwidth()
+		if screen_width > 1500:
+			screen_width = 1366
+		screen_height = self.root.winfo_screenheight()
+		if screen_height > 1500:
+			screen_height = 768
+
+		self.__initMainWindow(screen_width, screen_height)
 
 		self.__initWidgets()
 
@@ -61,9 +86,15 @@ class Graphical(object):
 
 		self.main_window = tk.Frame(self.root, width = w, height = h)
 		self.main_window.grid(column = 0, row = 0, sticky = tk.S+tk.E+tk.W+tk.N)
-		# self.main_window.rowconfigure(0, weight = 1)
-		self.main_window.columnconfigure(0, weight = 1)
-		self.main_window.columnconfigure(1, weight = 3)
+
+		self.main_window.rowconfigure(0, weight = 1)
+		self.main_window.rowconfigure(1, weight = 1)
+		self.main_window.rowconfigure(2, weight = 3)
+
+
+		self.main_window.columnconfigure(0, weight = 2)
+		self.main_window.columnconfigure(1, weight = 1)
+		self.main_window.columnconfigure(2, weight = 2)
 
 		self.main_window.grid_propagate(0)
 
@@ -72,19 +103,23 @@ class Graphical(object):
 		the class
 		"""
 
-		# Inits the clickeable buttons
-		self.buttons = [
-			tk.Button(self.main_window, text = "PLAYLIST", command = lambda : self.askForFile("your playlist folder")),
-			tk.Button(self.main_window, text = "QUIT", command = quit)
-		]
-		# The grid method returns None, we can't concat this line with the initialisation of the buttons on the list above
-		self.buttons[0].grid(column = 0, row = 0, sticky = tk.W)
-		self.buttons[1].grid(column = 1, row = 0, sticky = tk.W)
+		self.buttons = {
+			'playlist' : tk.Button(self.main_window, text = "PLAYLIST", command = lambda : self.askForFile(Folder.PLAYLIST_FOLDER, file_name = "your playlist folder")),
+			'sounds_source' : tk.Button(self.main_window, text = "SOURCE" , command = lambda : self.askForFile(Folder.SOUNDS_SRC, file_name = "your sounds folder"))
+		}
+		# Place the buttons
+		self.buttons['playlist'].grid(column = 0, row = 0, padx = DEFAULT_PADDING, sticky = tk.W)
+		self.buttons['sounds_source'].grid(column = 0, row = 1, padx = DEFAULT_PADDING, sticky = tk.W+tk.N)
 
-		# Inits the playlist's listbox
-		self.playlist_listbox = tk.Listbox(self.main_window, width = 50, selectmode = tk.SINGLE)
-		self.playlist_listbox.grid(column = 0, columnspan = 2, row = 1, padx = DEFAULT_PADDING, sticky = tk.W)
 
+		self.listboxs = {
+			'playlists' : tk.Listbox(self.main_window, selectmode = tk.SINGLE),
+			'sounds' : tk.Listbox(self.main_window, selectmode = tk.MULTIPLE)
+		}
+
+		# Place the listboxs
+		self.listboxs['playlists'].grid(column = 0, row = 2, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING, sticky = tk.W+tk.N+tk.S+tk.E)
+		self.listboxs['sounds'].grid(column = 2, row = 2, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING, sticky = tk.W+tk.N+tk.S+tk.E)
 
 	def updateListbox(self, l, lb):
 		"""Resets and adds items contaned in a list to a TK listbox
@@ -92,40 +127,53 @@ class Graphical(object):
 		Args:
 		    l (list): The list containg the items
 		    lb (tkinter.Listbox): The listbox
-
-		Returns:
-		    tkinter.Listbox: The updated listbox
 		"""
 
 		lb.delete(0, tk.END)
 		for i in range(len(l)):
 			lb.insert(tk.END, l[i])
-		return lb
+
+	def __getAndUpdateListbox(self, event):
+		playlist_full_path = self.user.playlist_src + "/" + self.listboxs['playlists'].get(tk.ACTIVE)
+		sounds_in_playlist = self.user.getFilesInPlaylist(playlist_full_path)
+		sounds_in_playlist = self.user.cleanList(sounds_in_playlist, delete_extension = True)
+		if sounds_in_playlist != []:
+			self.updateListbox(sounds_in_playlist, self.listboxs['sounds'])
 
 
-	def askForFile(self, file_name = ""):
-		"""Asks the user to open a file using tkinter. The chosen file
-		is stored in the object as "last_file_chosen_by_user"
+	def askForFile(self, required_folder, file_name = ""):
+		"""Asks the user to open a file using tkinter.
 
 		Args:
+			required_folder (Folder): The type of folder required
 		    file_name (str): The name of the file the program wants the user to open.
-		    				 Please note that this string is only here to help the user by printing
-		    				 a little headline in the selection box
 
 		"""
 
 		printed_string = ""
-		if file_name = "":
+
+		if file_name == "":
 			printed_string = "Please choose where the file is"
 		else:
 			printed_string = "Please choose where " + file_name + " is"
 
 		# Lets the user choose a directory
-		self.last_file_chosen_by_user = tk.filedialog.askdirectory(title = printed_string)
-		# Lists the chosen directory
-		self.user.playlist_list = self.last_file_chosen_by_user
-		# Updates the listbox
-		self.updateListbox(self.user.playlist_list, self.playlist_listbox)
+		user_folder = tk.filedialog.askdirectory(title = printed_string)
+
+		if required_folder == Folder.PLAYLIST_FOLDER:
+			self.user.playlist_list = user_folder # Updates the users info
+			self.updateListbox(self.user.playlist_list, self.listboxs['playlists']) # Updates the playlists listbox
+
+			# When the user clicks on a playlist in the listbox, updates self.last_file_chosen_by_user
+			self.listboxs['playlists'].bind('<<ListboxSelect>>', self.__getAndUpdateListbox)
+
+		elif required_folder == Folder.SOUNDS_SRC:
+			self.user.sounds_src = user_folder
+
+		elif required_folder == Folder.SOUNDS_DST:
+			self.user.sounds_dst = user_folder
+
+
 
 
 
