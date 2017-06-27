@@ -115,7 +115,7 @@ class Graphical(object):
 		self.buttons = {
 			'playlist' : tk.Button(self.main_window, text = "PLAYLIST", command = lambda : self.askForFile(Folder.PLAYLIST_FOLDER, file_name = "your playlist folder")),
 			'sounds_source' : tk.Button(self.main_window, text = "SOURCE" , command = lambda : self.askForFile(Folder.SOUNDS_SRC, file_name = "your sounds folder")),
-			'extract' : tk.Button(self.main_window, text = "EXTRACT", command = lambda : self.tryToCopyPlaylist(self.playlist_chosen_by_user))
+			'extract' : tk.Button(self.main_window, text = "EXTRACT", command = lambda : self.errorHandlerMessageBox(lambda : tryToCopyPlaylist(self.playlist_chosen_by_user)))
 		}
 		# Place the buttons
 		self.buttons['playlist'].grid(column = 0, row = 1, padx = DEFAULT_PADDING, sticky = tk.W)
@@ -151,11 +151,17 @@ class Graphical(object):
 		for i in range(len(l)):
 			lb.insert(tk.END, l[i])
 
-	def tryToCopyPlaylist(self, playlist):
+	def errorHandlerMessageBox(self, f):
+		"""Prints an error message if an error is raised during the call to the f function
+
+		Args:
+		    f (function): The function to be called
+		"""
 		try:
-			self.user.copyPlaylist(playlist)
+			f()
 		except:
 			tk.messagebox.showerror("ERROR", "An error was encoutered")
+
 
 
 	def __getAndUpdateListbox(self, event):

@@ -1,5 +1,6 @@
 EXTRACT:
   ☐ Remove the default playlist settings
+  ☐ Raise different errors when strings are empty for instance
 
 GRAPHICAL:
-  ☐ Split graphical into classes: each class corresponds to a different window (needed to update buttons). Or don't. Just block some buttons and active some other
+ ☐ Manage raised errors in the errorHandler function. Maybe a new param called "type" could be added to this one, desribing the type of error window to be opened (error, warning, ...)
