@@ -14,18 +14,6 @@ from error import *
 # List of the available audio file extensions.
 BAD_EXTENSIONS = [".mp3", ".wav", ".ogg", ".wma"]
 
-
-##
-## @brief      Default settings for playlist (will be removed later)
-##
-class DefaultSettings(object):
-	def __init__(self):
-		self.DEFAULT_PLAYLIST_SRC = "/home/emile/Documents/programmation/python/playlist_manager/playlist"
-		self.DEFAULT_SOUNDS_DST = "/home/emile/Documents/programmation/python/playlist_manager/sounds"
-		self.DEFAULT_SOUNDS_SRC = "/home/emile/Musique/"
-		self.DEFAULT_DELETABLE_STRING = "/storage/9016-4EF8/Sounds/"
-
-
 """Colors the print() function
 
 Values:
@@ -38,7 +26,7 @@ Values:
     UNDERLINE (str): Underline text
     YELLOW (str): Yellow color
 """
-Colors = {
+COLORS = {
 	'GREEN' : '\033[92m',
 	'BLUE' : '\033[94m',
 	'PINK' : '\033[95m',
@@ -49,57 +37,62 @@ Colors = {
 	'ENDC' : '\033[0m' # Ends the colored string
 }
 
+##
+## @brief      Default settings for playlist (will be removed later)
+##
+class DefaultSettings(object):
+	def __init__(self):
+		self.DEFAULT_PLAYLIST_SRC = "/home/emile/Documents/programmation/python/playlist_manager/playlist"
+		self.DEFAULT_SOUNDS_DST = "/home/emile/Documents/programmation/python/playlist_manager/sounds"
+		self.DEFAULT_SOUNDS_SRC = "/home/emile/Musique/"
+		self.DEFAULT_DELETABLE_STRING = "/storage/9016-4EF8/Sounds/"
 
-##
-## @brief      Informations about the user's setup: where are his playlists,
-##             where are the source of his sounds, where does he want to copy
-##             his sounds to
-##
+
+
 class Setup(object):
+	"""Informations about the user's setup: where are his playlists,
+	where are the source of his sounds, where does he want to copy
+	his sounds to
+
+	Attributes:
+	    deletable_string (str): TO BE REMOVED
+	    playlist_src (str): The full path to the directory where playlists are stored
+	    sounds_dst (str): The full path to the directory where sounds will be copied
+	    sounds_src (str): The full path to the directory where sounds are stored
+	"""
 	def __init__(self, playlist_src, sounds_src, sounds_dst, deletable_string):
-		self.__playlist_src = playlist_src
+		self.playlist_src = playlist_src
 		self.sounds_src = sounds_src
 		self.sounds_dst = sounds_dst
 		self.deletable_string = deletable_string
 
-	@property
-	def playlist_src(self):
-		return self.__playlist_src
-
-	@playlist_src.setter
-	def playlist_src(self, new_src):
-		self.__playlist_src = new_src
 
 
-##
-## @brief
-##
+
 class Extractor(Setup):
 	"""This object's purpose is to extract sounds contained in a playlist
 
 	Attributes:
-	    playlist_list_with_path (str): List of the playlists's full paths
 	    playlist_src (str): Inherited by the Setup object
+	    files_in_playlist (dict): Contains lists of files in playlists. Keys are the playlists names
 	"""
 
 	def __init__(self, playlist_src = DefaultSettings().DEFAULT_PLAYLIST_SRC, sounds_src = DefaultSettings().DEFAULT_SOUNDS_SRC, sounds_dst = DefaultSettings().DEFAULT_SOUNDS_DST, deletable_string = DefaultSettings().DEFAULT_DELETABLE_STRING):
 		super().__init__(playlist_src, sounds_src, sounds_dst, deletable_string)
 		self.__playlist_list = os.listdir(self.playlist_src)
-		# Allows the concatenation of the playlist's location with its name
-		self.playlist_list_with_path = [self.playlist_src + "/" + p for p in self.playlist_list]
+		self.files_in_playlist = {}
+
 
 	@property
 	def playlist_list(self):
 		"""This private attribute is a list of the files contained in the folder self.playlist_src
 		"""
-
 		return self.__playlist_list
 
 	@playlist_list.setter
 	def playlist_list(self, directory):
 		self.playlist_src = directory
 		self.__playlist_list = os.listdir(directory)
-
 
 
 	def getFilesInPlaylist(self, playlist):
@@ -113,13 +106,14 @@ class Extractor(Setup):
 		    list: A list of strings corresponding to the full path of the files in the playlist. Empty list if the playlist argument is not valid
 		"""
 
-		l = []
-		if playlist == "":
+		if playlist is "":
 			raise FileError("ERROR: The playlist is not selected")
 			return []
 		if not playlist.endswith(".txt"):
 			raise FileError("ERROR: The playlist is not ending with \".txt\"")
 			return []
+
+		l = []
 		f = open(playlist, "r")
 		for line in f:
 			l = l + [line.strip('\n')]
@@ -151,23 +145,23 @@ class Extractor(Setup):
 
 
 
-	def __putSourcePathWithList(self, files_in_playlist):
+	def __putSourcePathWithList(self, list_of_files_in_playlist):
 		"""Concatenates the sounds source folder's name with all the
 		file's names
 
 		Args:
-		    files_in_playlist (list): A list of strings corresponding to the file's names
+		    list_of_files_in_playlist (list): A list of strings corresponding to the file's names
 
 		Returns:
 		    list: A list of string corresponding to all the concatenations of the source path and the file's names. Empty list if error.
 		"""
 
-		if self.sounds_src == "":
+		if self.sounds_src is "":
 			raise FolderError("ERROR: No source for sounds was defined")
 			return []
 
 		l = []
-		for i in files_in_playlist:
+		for i in list_of_files_in_playlist:
 			l = l + [self.sounds_src + i]
 		return l
 
@@ -194,7 +188,7 @@ class Extractor(Setup):
 			NoneType: Returns None if an error is encountered
 		"""
 
-		if self.sounds_dst == "":
+		if self.sounds_dst is "":
 			raise FolderError("ERROR: No destination folder was defined")
 			return None
 
@@ -205,10 +199,10 @@ class Extractor(Setup):
 			return None
 
 		playlist_basename = os.path.basename(playlist)
-		print(Colors['PINK'] + "Copying playlist : " + playlist_basename + Colors['ENDC'])
+		print(COLORS['PINK'] + "Copying playlist : " + playlist_basename + COLORS['ENDC'])
 
 		files_names = self.cleanList(files_list) # Name of the files, solely
-		files_in_playlist = self.__putSourcePathWithList(files_names) # Name of the source folder's path concatenated with files names
+		list_of_files_with_path = self.__putSourcePathWithList(files_names) # Name of the source folder's path concatenated with files names
 
 		file_count = 0
 		copied_files = 0
@@ -218,12 +212,12 @@ class Extractor(Setup):
 		try:
 			mkdir(local_dst)
 		except NotImplementedError:
-			print(Colors['YELLOW'] + "The mkdir method is not implemented by the kernel. No directory was created" + Colors['ENDC'])
+			print(COLORS['YELLOW'] + "The mkdir method is not implemented by the kernel. No directory was created" + COLORS['ENDC'])
 			local_dst = "." # Resets the destination of the copy to the current folder
 		except FileExistsError:
 			pass
 
-		for i in files_in_playlist:
+		for i in list_of_files_with_path:
 			current_file = files_names[file_count]
 			try:
 				if not os.path.exists(i):
@@ -234,19 +228,18 @@ class Extractor(Setup):
 					# Tries again with no "/" added
 					copy_file(i, local_dst + current_file)
 				except FileNotFoundError:
-					print(Colors['FAIL'] + "FILE NOT FOUND: " + current_file.strip(".mp3") + Colors['ENDC'])
+					print(COLORS['FAIL'] + "FILE NOT FOUND: " + current_file.strip(".mp3") + COLORS['ENDC'])
 					continue
 			finally:
 				file_count += 1
 
-			print(Colors['GREEN'] + "File number " + str(file_count) + " successfully copied : " + str(current_file).strip(".mp3") + Colors['ENDC'])
+			print(COLORS['GREEN'] + "File number " + str(file_count) + " successfully copied : " + str(current_file).strip(".mp3") + COLORS['ENDC'])
 			copied_files += 1
-		print(Colors['YELLOW'] + "This program successfully copied " + str(copied_files) + " files out of " + str(file_count) + Colors['ENDC'])
+		print(COLORS['YELLOW'] + "This program successfully copied " + str(copied_files) + " files out of " + str(file_count) + COLORS['ENDC'])
 
 
 
 
 if __name__ == '__main__':
-	user = Extractor()
-	for l in user.playlist_list_with_path:
-		user.copyPlaylist(l)
+	print("You can't launch this")
+	sys.exit(0)
