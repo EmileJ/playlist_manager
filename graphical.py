@@ -152,6 +152,7 @@ class Graphical(object):
 		for i in range(len(l)):
 			lb.insert(tk.END, l[i])
 
+
 	def errorHandlerMessageBox(self, f):
 		"""Prints an error message if an error is raised during the call to the f function
 
@@ -184,14 +185,18 @@ class Graphical(object):
 		# Gets the full path of the playlist's location
 		playlist_full_path = self.user.playlist_src + "/" + self.listboxs['playlists'].get(tk.ACTIVE)
 		self.playlist_chosen_by_user = playlist_full_path
-		# Lists all the files contained in the playlist
-		sounds_in_playlist = self.user.getFilesInPlaylist(playlist_full_path)
-		# Cleans the playlist with all the unwanted strings
-		sounds_in_playlist = self.user.cleanList(sounds_in_playlist, delete_extension = True)
-		sounds_in_playlist.sort()
-		# Finally, updates the listbox
-		if sounds_in_playlist != []:
-			self.updateListbox(sounds_in_playlist, self.listboxs['sounds'])
+
+		# If the playlist was not already listed
+		if self.user.files_in_playlist.get(playlist_full_path) is None:
+			# Lists the files contained in the playlist
+			self.user.files_in_playlist[playlist_full_path] = self.user.getFilesInPlaylist(playlist_full_path)
+
+			# Cleans the playlist with all the unwanted strings
+			self.user.files_in_playlist[playlist_full_path] = self.user.cleanList(self.user.files_in_playlist[playlist_full_path], delete_extension = True)
+			self.user.files_in_playlist[playlist_full_path].sort()
+
+		# Updates the sounds listbox
+		self.updateListbox(self.user.files_in_playlist[playlist_full_path], self.listboxs['sounds'])
 
 
 	def askForFile(self, required_folder, file_name = ""):
