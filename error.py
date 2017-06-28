@@ -5,8 +5,6 @@
 """
 
 
-
-
 class FolderError(Exception):
     """Unvalid folder selected
     """
