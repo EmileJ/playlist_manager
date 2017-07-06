@@ -30,7 +30,7 @@ COLORS = {
 	'GREEN' : '\033[92m',
 	'BLUE' : '\033[94m',
 	'PINK' : '\033[95m',
-	'YELLOW' : '\033[93,m',
+	'YELLOW' : '\033[93m',
 	'BOLD' : '\033[1m',
 	'UNDERLINE' : '\03,3[4m',
 	'FAIL' : '\033[91m',
@@ -55,16 +55,14 @@ class Setup(object):
 	his sounds to
 
 	Attributes:
-	    deletable_string (str): TO BE REMOVED
 	    playlist_src (str): The full path to the directory where playlists are stored
 	    sounds_dst (str): The full path to the directory where sounds will be copied
 	    sounds_src (str): The full path to the directory where sounds are stored
 	"""
-	def __init__(self, playlist_src, sounds_src, sounds_dst, deletable_string):
+	def __init__(self, playlist_src, sounds_src, sounds_dst):
 		self.playlist_src = playlist_src
 		self.sounds_src = sounds_src
 		self.sounds_dst = sounds_dst
-		self.deletable_string = deletable_string
 
 
 
@@ -77,9 +75,8 @@ class Extractor(Setup):
 	    files_in_playlist (dict): Contains lists of files in playlists. Keys are the playlists names
 	"""
 
-	def __init__(self, playlist_src = DefaultSettings().DEFAULT_PLAYLIST_SRC, sounds_src = DefaultSettings().DEFAULT_SOUNDS_SRC, sounds_dst = DefaultSettings().DEFAULT_SOUNDS_DST, deletable_string = DefaultSettings().DEFAULT_DELETABLE_STRING):
-		super().__init__(playlist_src, sounds_src, sounds_dst, deletable_string)
-		self.__playlist_list = os.listdir(self.playlist_src)
+	def __init__(self, playlist_src = "", sounds_src = "", sounds_dst = ""):
+		super().__init__(playlist_src, sounds_src, sounds_dst)
 		self.files_in_playlist = {}
 
 
@@ -188,14 +185,18 @@ class Extractor(Setup):
 			NoneType: Returns None if an error is encountered
 		"""
 
-		if self.sounds_dst is "":
-			raise FolderError("ERROR: No destination folder was defined")
-			return None
-
 		try:
 			files_list = self.getFilesInPlaylist(playlist)
 		except:
 			raise # Re-raises the last raise again, so the error handler can catch the exception
+			return None
+
+		if self.sounds_src is "":
+			raise FolderError("ERROR: No source folder was defined")
+			return None
+
+		elif self.sounds_dst is "":
+			raise FolderError("ERROR: No destination folder was defined")
 			return None
 
 		playlist_basename = os.path.basename(playlist)
