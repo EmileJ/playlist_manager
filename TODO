@@ -1,7 +1,8 @@
 EXTRACT:
-  ☐ Remove the default playlist settings
   ☐ Raise different errors when strings are empty for instance
+  ✔ Remove the default playlist settings @done (17-07-07 00:53)
 
 GRAPHICAL:
- ☐ Manage raised errors in the errorHandler function. Maybe a new param called "type" could be added to this one, desribing the type of error window to be opened (error, warning, ...)
  ☐ Better printing of the playlists when rapidly switching between them: store playlists in a list that doesn't change
+ ☐ Manage messages concerning the amount of files copied, not copied, etc..
+ ✔ Manage raised errors in the errorHandler function. Maybe a new param called "type" could be added to this one, desribing the type of error window to be opened (error, warning, ...) @done (17-07-07 00:53)
