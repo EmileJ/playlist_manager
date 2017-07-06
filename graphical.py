@@ -89,16 +89,18 @@ class Graphical(object):
 		self.main_window = tk.Frame(self.root, width = w, height = h)
 		self.main_window.grid(column = 0, row = 0, sticky = tk.S+tk.E+tk.W+tk.N)
 
+		# Sets the size of each row
 		self.main_window.rowconfigure(0, weight = 1)
 		self.main_window.rowconfigure(1, weight = 1)
 		self.main_window.rowconfigure(2, weight = 1)
 		self.main_window.rowconfigure(3, weight = 1)
 		self.main_window.rowconfigure(4, weight = 1)
 		self.main_window.rowconfigure(5, weight = 1)
-		self.main_window.rowconfigure(6, weight = 10)
+		self.main_window.rowconfigure(6, weight = 1)
+		self.main_window.rowconfigure(7, weight = 1)
+		self.main_window.rowconfigure(8, weight = 10)
 
-
-
+		# Sets the size of each column
 		self.main_window.columnconfigure(0, weight = 1)
 		self.main_window.columnconfigure(1, weight = 2)
 		self.main_window.columnconfigure(2, weight = 1)
@@ -114,21 +116,29 @@ class Graphical(object):
 		"""
 
 		self.buttons = {
-			'playlist' : tk.Button(self.main_window, text = "PLAYLIST", command = lambda : self.askForFile(Folder.PLAYLIST_FOLDER, file_name = "your playlist folder")),
-			'sounds_source' : tk.Button(self.main_window, text = "SOURCE" , command = lambda : self.askForFile(Folder.SOUNDS_SRC, file_name = "your sounds folder")),
-			'extract' : tk.Button(self.main_window, text = "EXTRACT", command = lambda : self.errorHandlerMessageBox(lambda : self.user.copyPlaylist(self.playlist_chosen_by_user)))
+			'playlist' : tk.Button(self.main_window, text = "PLAYLIST",
+				command = lambda : self.askForFile(Folder.PLAYLIST_FOLDER, file_name = "your playlist folder")),
+			'sounds_source' : tk.Button(self.main_window, text = "SOURCE",
+				command = lambda : self.askForFile(Folder.SOUNDS_SRC, file_name = "your sounds source folder")),
+			'sounds_destination' : tk.Button(self.main_window, text = "DESTINATION",
+				command = lambda : self.askForFile(Folder.SOUNDS_DST, file_name = "your sounds destination folder")),
+			'extract' : tk.Button(self.main_window, text = "EXTRACT",
+				command = lambda : self.errorHandlerMessageBox(lambda : self.user.copyPlaylist(self.playlist_chosen_by_user)))
 		}
 		# Place the buttons
 		self.buttons['playlist'].grid(column = 0, row = 1, padx = DEFAULT_PADDING, sticky = tk.W)
 		self.buttons['sounds_source'].grid(column = 0, row = 3, padx = DEFAULT_PADDING, sticky = tk.W)
-		self.buttons['extract'].grid(column = 3, row = 5, pady = DEFAULT_PADDING, sticky = tk.N)
+		self.buttons['sounds_destination'].grid(column = 0, row = 5, padx = DEFAULT_PADDING, sticky = tk.W)
+		self.buttons['extract'].grid(column = 3, row = 7, pady = DEFAULT_PADDING, sticky = tk.N)
 
 		self.labels = {
 			'playlist' : tk.Label(self.main_window, background = '#fff', relief = tk.SUNKEN),
-			'sounds_source' : tk.Label(self.main_window, background = '#fff', relief = tk.SUNKEN)
+			'sounds_source' : tk.Label(self.main_window, background = '#fff', relief = tk.SUNKEN),
+			'sounds_destination' : tk.Label(self.main_window, background = '#fff', relief = tk.SUNKEN)
 		}
 		self.labels['playlist'].grid(column = 1, row = 1, columnspan = 3, padx = DEFAULT_PADDING, sticky = tk.W+tk.E)
 		self.labels['sounds_source'].grid(column = 1, row = 3, columnspan = 3, padx = DEFAULT_PADDING, sticky = tk.W+tk.E)
+		self.labels['sounds_destination'].grid(column = 1, row = 5, columnspan = 3, padx = DEFAULT_PADDING, sticky = tk.W+tk.E)
 
 
 		self.listboxs = {
@@ -137,8 +147,8 @@ class Graphical(object):
 		}
 
 		# Place the listboxs
-		self.listboxs['playlists'].grid(column = 0, columnspan = 3, row = 5, rowspan = 2, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING, sticky = tk.W+tk.N+tk.S+tk.E)
-		self.listboxs['sounds'].grid(column = 4, columnspan = 2, row = 5, rowspan = 2, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING, sticky = tk.W+tk.N+tk.S+tk.E)
+		self.listboxs['playlists'].grid(column = 0, columnspan = 3, row = 7, rowspan = 2, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING, sticky = tk.W+tk.N+tk.S+tk.E)
+		self.listboxs['sounds'].grid(column = 4, columnspan = 2, row = 7, rowspan = 2, padx = DEFAULT_PADDING, pady = DEFAULT_PADDING, sticky = tk.W+tk.N+tk.S+tk.E)
 
 	def updateListbox(self, l, lb):
 		"""Resets and adds items contaned in a list to a TK listbox
@@ -171,6 +181,7 @@ class Graphical(object):
 		# Manages warnings
 		except NotImplementedError as e:
 			tk.messagebox.showwarning("WARNING: No directory created", e)
+
 
 
 
